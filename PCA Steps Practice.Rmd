@@ -1,0 +1,80 @@
+---
+title: "PCA Steps Practice"
+author: "Mikayla Mulgrew"
+---
+
+1.  Standardise the data
+2.  Calculate the covariance matrix
+3.  Extract eigenvectors and eigenvalues
+4.  Choose a subset of principal components
+
+```{r}
+#load tidyverse package
+library(tidyverse)
+
+#load USArrests dataset
+data("USArrests")
+
+# Step 1: Standardise
+
+#need to prepare data for PCA, normalise and standardise, can use inbuilt function apply() 
+
+#Q1: Attempt to replicate the scaling using a for loop
+
+#initialise new vector to hold standardised columns of data
+stand_usarrests <- c()
+
+#loop through each column of data set
+for (i in 1:ncol(USArrests)){
+  
+  #assign whole column to a variable and get mean and standard deviation of column
+  arr_col <- USArrests[,i]
+  arr_mean <- mean(arr_col)
+  arr_sd <- sd(arr_col)
+  
+  #standardise column 
+  stand_col <- (arr_col-arr_mean)/arr_sd
+  
+  #add to stand_usarrests
+  stand_usarrests <- cbind(stand_usarrests, stand_col)
+}
+
+#keep same column names 
+colnames(stand_usarrests) <- colnames(USArrests)
+
+head(stand_usarrests)
+
+# Step 2: Compute Covariance Matrix
+
+covmat_usarrests <- cov(stand_usarrests)
+
+#Step 3: Calculate Eigenvalues
+
+eigen_usarrests <- eigen(covmat_usarrests)
+
+#Step 4: Choose subset of principal components
+
+#want only two principal components
+#keep first two columns 
+pc_usarrests <- eigen_usarrests$vectors[,1:2]
+
+#Eigenvectors calculated in R point in the negative direction, in the main package to perform PCA in R they point in the positive direction. To ensure we can perform the comparison we will flip the sign by multiplying by −1
+
+pc_usarrests <- -pc_usarrests
+
+colnames(pc_usarrests) <- c("PC1", "PC2")
+rownames(pc_usarrests) <- colnames(USArrests)
+
+#Step 5: Project and Plot
+
+#PC1 corresponds to seriousness of crimes
+#PC2 corresponds to urban population
+pc1 <- as.matrix(stand_usarrests) %*% pc_usarrests[, 1]
+pc2 <- as.matrix(stand_usarrests) %*% pc_usarrests[, 2]
+
+#create data frame to be able to use ggplot
+arrestsData <- data.frame(state=row.names(USArrests), pc1, pc2)
+
+ggplot(arrestsData, aes(pc1, pc2)) + geom_text(aes(label=state), size=3) + labs(x="PC1", y="PC2", title="Two PCs for USArrests Data")
+
+```
