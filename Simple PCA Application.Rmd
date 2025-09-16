@@ -1,0 +1,52 @@
+---
+title: "Simple PCA Application"
+author: "Mikayla Mulgrew"
+---
+
+```{r, fig.width=8, fig.height=10}
+library(ggplot2)
+head(mtcars)
+dim(mtcars) #32 examples (rows) and 11 features (columns)
+
+#use prcomp() to perform PCA
+pr_mtcars <- prcomp(mtcars, center=TRUE, scale=TRUE)
+#print(pr_mtcars)
+
+#compared to prcomp without scaling and centering
+nosc_pr <- prcomp(mtcars, center=FALSE, scale=FALSE)
+#print(nosc_pr)
+
+#use summary() function to summarise PCA results
+sum_mtcars <- summary(pr_mtcars)
+print(sum_mtcars)
+
+#create data frame with summarised data and names from mtcars data set
+pca_cars_df <- data.frame(sum_mtcars$x, Make=rownames(mtcars))
+#print(pca_cars_df)
+
+#plot using ggplot
+ggplot(pca_cars_df, aes(x=PC1, y=PC2, col=Make)) + geom_point(size=3) + labs(x="PC1 60.08%", y="PC2 24.09%", title = "PCs for mtcars data") + theme(legend.position = "bottom")
+```
+
+```{r fig.width=8, fig.height=10}
+#Q1: Now try to perform a PCA on the USArrests data also build into R. Typing ?USArrests will give you further information on the data. Perform the analysis on the subset USArrests[, -3] data.
+
+library(ggplot2)
+head(USArrests)
+dim(USArrests) #50 examples (rows) and 4 features (columns)
+
+#use prcomp() to perform PCA
+pcaUSA <- prcomp(USArrests[,-3], center=TRUE, scale=TRUE)
+#print(pcaUSA)
+
+#use summary() function to summarise PCA results
+sum_pcaUSA <- summary(pcaUSA)
+print(sum_pcaUSA)
+
+#create data frame with summarised data and names from mtcars data set
+pcaUSA_df <- data.frame(sum_pcaUSA$x, State=rownames(USArrests))
+#print(pcaUSA_df)
+
+#plot using ggplot
+ggplot(pcaUSA_df, aes(x=PC1, y=PC2, col=State)) + geom_point(size=3) + labs(x="PC1 62.01%", y="PC2 24.74%", title = "PCs for USArrests data") + theme(legend.position = "bottom")
+```
