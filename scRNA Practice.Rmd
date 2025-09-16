@@ -1,0 +1,45 @@
+---
+title: "Single Cell Dimensionality Reduction in R Practice"
+author: "Mikayla Mulgrew"
+---
+
+```{r}
+#load library for tsne and UMAP
+library(M3C)
+
+#load data
+load("scRNA-data.Rdata")
+#head(scRNA_data, 10) 
+#dim(scRNA_data) #1748 examples 432 features
+
+#Measurements of scRNA-Seq data are integer counts, this data does not have good properties so perform a transformation on the data. The most commonly used transformation on RNA-Seq count data is log2. Then transpose the data matrix to rows representing cells and columns representing genes. This data we can then be used to perform PCA.
+
+#using log2(data + 1), the +1 handles zero values in the data since log2(0) = undefined. Especially for count data, +1 stabilizes the variance while dependent on the mean.  
+sc_scaled <- scale(log2(scRNA_data + 1))
+
+#check that scaling worked correctly by plotting data
+plot(colSums(sc_scaled))
+
+#get standard deviation across columns (2)
+scaledCol_sd <- apply(sc_scaled, 2, sd)
+plot(scaledCol_sd)
+
+#density function visualizes the distribution of data over a continuous interval/time period
+sc_density <- density(sc_scaled[,2])
+plot(sc_density)
+
+#perform PCA (Using t to transpose matrix sc_scaled - why)
+sc_PCA <- prcomp(t(sc_scaled))
+#print(summary(sc_PCA))
+
+biplot(sc_PCA)
+
+
+#Use tsne() from loaded package then plot
+sc_tsne <- tsne(sc_scaled)
+plot(sc_tsne)
+
+sc_umap <- umap(sc_scaled)
+plot(sc_umap)
+
+```
