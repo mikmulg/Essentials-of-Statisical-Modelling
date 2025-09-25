@@ -1,0 +1,81 @@
+---
+title: "Robust Regression Practice"
+author: "Mikayla Mulgrew"
+---
+
+```{r}
+
+#Simulate data, create data frame
+set.seed(2309)
+n <- 100
+
+data_df <- data.frame(x1=sample(1:25, n, replace=TRUE), x2=sample(9:40, n, replace=TRUE), y=sample(20:70, n, replace=TRUE))
+
+#add outliers
+set.seed(42)
+out_i <- sample(1:n, 3)
+
+data_df[out_i, 3] <- data_df[out_i, 3]*4
+
+#Q1 - Perform Linear Regression on this data with y as the response and two covariates x1 and x2. Then plot the residuals. 
+
+lm_res <- lm(y ~ x1+x2, data=data_df)
+
+#plot residuals
+plot(data_df$y, residuals(lm_res), ylab="Residuals", xlab="y")
+abline(h=0)
+
+#we can also plot standardised residuals
+plot(data_df$y, rstandard(lm_res), ylab="Standardised Residuals", xlab="y")
+abline(h=0)
+
+#there are 3 outliers so it will be best to perform robust regression
+
+#load library
+library(MASS)
+
+#perform robust regression
+lm_robust <- rlm(y~x1+x2, data=data_df)
+
+#compare results of the two regression models
+summary(lm_res)
+summary(lm_robust)
+
+#coefficients are different for both approaches 
+#check which approach better fits the data - looking at residuals
+
+#Residual standard error for linear regression
+summary(lm_res)$sigma
+
+#Residual standard error for robust regression
+summary(lm_robust)$sigma
+
+#31.62901 and 18.28292, so robust regression model performs better for this data
+
+```
+
+
+```{r}
+#Q4: Perform the same analysis by simulating data with a single outlier, and 200 data points
+
+set.seed(2309)
+n <- 200
+
+dat_df <- data.frame(x1=sample(1:25, n, replace=TRUE), x2=sample(9:40, n, replace=TRUE), y=sample(20:70, n, replace=TRUE))
+
+#add outliers
+set.seed(42)
+out_i <- sample(1:n, 1)
+dat_df[out_i, 3] <- dat_df[out_i,3]*4
+
+#simple linear regression 
+lmReg <- lm(y ~ x1+x2, data=dat_df)
+#robust regression
+lmRob <- rlm(y ~ x1+x2, data=dat_df)
+
+#get RSE for linear and robust regression
+summary(lmReg)$sigma
+summary(lmRob)$sigma
+
+#linear regression RSE is smaller than robust
+```
